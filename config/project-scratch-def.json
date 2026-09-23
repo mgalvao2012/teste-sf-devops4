@@ -1,7 +1,9 @@
 {
   "orgName": "sf-devops scratch",
   "edition": "Developer",
-  "features": [],
+  "features": [
+    "Einstein1AIPlatform"
+  ],
   "settings": {
     "lightningExperienceSettings": {
       "enableS1DesktopEnabled": true
