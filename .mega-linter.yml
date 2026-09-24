@@ -11,6 +11,16 @@ DISABLE_LINTERS:
   - SPELL_CSPELL          # technical vocabulary (SFDX, hardis, NOTIF, hardisgroupcom...)
   - SPELL_LYCHEE          # external link checker -> rate-limits / transient failures
   - REPOSITORY_GRYPE      # "vulnerability db does not exist" download/migration flake
+  # Broken tooling inside megalinter-salesforce:v8.8.0 (NOT code findings):
+  # sfdx-scanner JIT plugin install fails (npm ENOTEMPTY / corrupted tarball for
+  # @salesforce/sfdx-scanner@4.12.0); lightning-flow-scanner calls an invalid
+  # `sf flow:scan` command. Real Salesforce static analysis is already run by
+  # Code Analyzer inside `hardis:project:deploy:smart --check` (check-deploy.yml),
+  # and this repo has no Apex/Aura/LWC/Flow for them to scan anyway.
+  - SALESFORCE_SFDX_SCANNER_APEX
+  - SALESFORCE_SFDX_SCANNER_AURA
+  - SALESFORCE_SFDX_SCANNER_LWC
+  - SALESFORCE_LIGHTNING_FLOW_SCANNER
 
 # Keep these running for visibility, but do NOT fail the build on their findings.
 DISABLE_ERRORS_LINTERS:

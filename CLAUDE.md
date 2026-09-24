@@ -8,6 +8,15 @@ ambos rodando no container `ghcr.io/hardisgroupcom/sfdx-hardis-ubuntu:latest`.
 
 ## Gotchas
 
+- **Imagem `megalinter-salesforce:v8.8.0` tem os linters Salesforce quebrados.**
+  `SALESFORCE_SFDX_SCANNER_APEX/AURA/LWC` falham com `JitPluginInstallError`
+  (npm `ENOTEMPTY` / tarball corrompido ao instalar `@salesforce/sfdx-scanner@4.12.0`
+  em runtime); `SALESFORCE_LIGHTNING_FLOW_SCANNER` chama `sf flow:scan`, comando
+  inexistente na CLI empacotada. São defeitos de tooling, não findings de código.
+  Fix: desativados em `.mega-linter.yml` (`DISABLE_LINTERS`). A análise estática
+  Salesforce real já roda no Code Analyzer dentro de `hardis:project:deploy:smart
+  --check` (check-deploy.yml). Reavaliar ao subir a versão/flavor do MegaLinter.
+
 - **`check-deploy.yml` estava SEM o passo `git safe.directory` que `process-deploy.yml` tem.**
   O container hardis roda como usuário != dono do checkout → git aborta com
   `fatal: detected dubious ownership` → `sfdx-git-delta` recebe diff vazio →
