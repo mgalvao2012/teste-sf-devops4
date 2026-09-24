@@ -39,7 +39,11 @@ jobs:
           persist-credentials: true
           token: ${{ secrets.GITHUB_TOKEN }}
           fetch-depth: 0 # full history so hardis delta can diff against the base branch
-      # For a PR, the config/target org is the BASE branch (PR target), not the head branch.
+      # The sfdx-hardis container runs as a different user than the checkout owner,
+      # so git refuses to operate (dubious ownership) — mark the workspace safe.
+      - name: Mark workspace as safe for git
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          # For a PR, the config/target org is the BASE branch (PR target), not the head branch.
       # GITHUB_BASE_REF is already the bare branch name (no refs/heads/ prefix).
       - name: Set env.BRANCH
         run: echo "BRANCH=$GITHUB_BASE_REF" >> "$GITHUB_ENV"
