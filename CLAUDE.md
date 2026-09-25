@@ -53,3 +53,31 @@ ambos rodando no container `ghcr.io/hardisgroupcom/sfdx-hardis-ubuntu:latest`.
 
 - **`sfdx-git-delta` 6.45.1 não tem typedefs próprios** — delega ao registry do SDR
   (`sdrMetadataAdapter`). Reconhecimento de tipos novos depende da versão do SDR no runner.
+
+- **Sem `useDeltaDeployment: true`, o `deploy:smart` no PUSH (process-deploy) montava
+  escopo vazio e dava short-circuit ("No deployment or destructive changes") ANTES do Quick
+  Deploy reaproveitar a validação da PR** — o artefato validado no `--check` nunca chegava à
+  org. Reproduzido: sgd 6.45.1 reconhece `AiAuthoringBundle` e `HEAD^..HEAD` do merge da PR
+  #3 (`9be8190..a395946`) gera `ASA` corretamente; o vazio vinha do escopo que o hardis
+  escolhia no modo default. Fix: `useDeltaDeployment: true` em `config/.sfdx-hardis.yml` →
+  push passa a implantar `sgd --from HEAD^ --to HEAD` (só os artefatos do PR, nunca full).
+  ATENÇÃO: config NÃO blinda topologia degenerada — se o branch contém a target inteira
+  (caso `fix/ASA-adjust`, criada do tip da integration sem divergência), `HEAD^..HEAD` vira
+  no-op e o delta volta a ser vazio (ver gotcha do ASA acima). Garantia = config + branch
+  que diverge de verdade via feature→PR→merge.
+
+- **Delta mode faz `deploy final = manifesto-base ∩ git-delta`, e o `deploy:smart` exige o
+  manifesto-base como ARQUIVO.** `initPackageXmlAndDestructiveChanges` resolve
+  `this.packageXmlFile` na cadeia `--packagexml` → `PACKAGE_XML_TO_DEPLOY` →
+  `packageXmlToDeploy` (config) → `manifest/package.xml` → `config/package.xml` (último
+  fallback). Full mode tolera ausência (linha 307 do smart.js trata inexistente como
+  "vazio" → "No deployment or destructive changes"). Delta NÃO: `handleDeltaDeployment` faz
+  `fs.copy(this.packageXmlFile, packageDelta.xml)` ANTES de qualquer checagem → sem
+  `manifest/package.xml` nem `config/package.xml`, crash `ENOENT ./config/package.xml`.
+  Corolário perigoso: como o deploy é `base ∩ delta` (`removePackageXmlContent(base, gitDelta,
+  removedOnly=true, context:'delta')` = "keep matching items"), um `manifest/package.xml`
+  ESTÁTICO defasado descarta silenciosamente qualquer tipo que ele não liste — repete o
+  silent-drop do ASA. Fix: gerar `manifest/package.xml` a partir do `force-app` NO CI a cada
+  run (`sf project generate manifest --source-dir force-app --output-dir manifest --name
+  package`), antes do `deploy:smart`, nos dois workflows; nunca commitar o arquivo (fica no
+  `.gitignore`). Assim base ⊇ delta sempre → interseção = exatamente os artefatos do PR.

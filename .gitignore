@@ -8,6 +8,13 @@
 .localdevserver/
 deploy-options.json
 
+# Generated fresh from source in CI every run (see .github/workflows/*.yml).
+# Not committed on purpose so it can never go stale.
+manifest/package.xml
+
+# sgd scratch dirs from local delta debugging
+.sgd_*/
+
 # LWC VSCode autocomplete
 **/lwc/jsconfig.json
 
