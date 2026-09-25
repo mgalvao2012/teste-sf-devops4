@@ -1,0 +1,36 @@
+---
+# Auto-merge on green — Gate A → integration.
+# Enables GitHub's NATIVE auto-merge on PRs targeting integration. The merge does NOT
+# happen here: GitHub only merges once every REQUIRED status check passes (see branch
+# protection on integration -> required_status_checks context "Check-only Deployment to
+# Major Org", produced by check-deploy.yml). Merging pushes to integration, which triggers
+# process-deploy.yml for the real deploy.
+#
+# Requirements (one-time, repo settings):
+# - "Allow auto-merge" enabled:  gh repo edit mgalvao2012/teste-sf-devops4 --enable-auto-merge
+# - Branch protection on integration requiring the check-deploy status check + 0 approvals.
+on:
+  pull_request:
+    types: [opened, reopened, synchronize, ready_for_review]
+    branches:
+      - integration
+
+name: Auto-merge on green (integration)
+permissions:
+  contents: write
+  pull-requests: write
+concurrency:
+  group: ${{ github.event.pull_request.number }}-${{ github.workflow }}
+  cancel-in-progress: true
+
+jobs:
+  enable-auto-merge:
+    name: Enable auto-merge
+    runs-on: ubuntu-latest
+    # Skip drafts — auto-merge would sit pending until marked ready anyway.
+    if: github.event.pull_request.draft == false
+    steps:
+      - name: Enable native auto-merge (squash)
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh pr merge --auto --squash "${{ github.event.pull_request.number }}" -R "${{ github.repository }}"
