@@ -8,6 +8,17 @@ ambos rodando no container `ghcr.io/hardisgroupcom/sfdx-hardis-ubuntu:latest`.
 
 ## Gotchas
 
+- **Metadado commitado DIRETO numa branch maior (fora do fluxo feature→PR) nunca entra
+  num delta de deploy.** O ASA foi criado direto na `integration` (`c5c81b9`); depois
+  `feature/ASA` fez merge da integration nela mesma (`97fc65e`), então o merge da PR #1
+  (`affb14b`) não teve delta de árvore vs. a base/head da PR → `sgd --from 97fc65e --to
+  affb14b` = package.xml VAZIO → "No deployment or destructive changes to perform".
+  (NÃO é falta de reconhecimento de tipo: sgd 6.45.1 gera `AiAuthoringBundle: ASA`
+  corretamente em `--from e24b9a2 --to affb14b`.) Regra: só criar/alterar metadado em
+  feature branch → PR → merge; nunca commitar direto em integration/uat/production, e
+  não fazer merge da target de volta na feature logo antes do merge da PR (vira no-op de
+  árvore). Correção pontual quando já caiu no buraco: deploy manual do componente.
+
 - **Imagem `megalinter-salesforce:v8.8.0` tem os linters Salesforce quebrados.**
   `SALESFORCE_SFDX_SCANNER_APEX/AURA/LWC` falham com `JitPluginInstallError`
   (npm `ENOTEMPTY` / tarball corrompido ao instalar `@salesforce/sfdx-scanner@4.12.0`
