@@ -6,12 +6,16 @@
     "**/.sfdx": true
   },
   "xml.preferences.showSchemaDocumentationType": "none",
-  "vibes.salesforce.defaultOrg": "sdo-250321-dev1",
+  "vibes.salesforce.defaultOrg": "MyScratchOrg",
   "workbench.colorCustomizations": {
     "statusBar.foreground": "#ffffff",
     "statusBarItem.hoverBackground": "#327e9f",
     "statusBarItem.remoteBackground": "#0b4c68",
     "statusBarItem.remoteForeground": "#ffffff",
-    "activityBarBadge.foreground": "#ffffff"
+    "activityBarBadge.foreground": "#ffffff",
+    "statusBar.background": "#05628a",
+    "statusBar.border": "#05628a",
+    "activityBar.activeBorder": "#05628a",
+    "activityBarBadge.background": "#05628a"
   }
 }
