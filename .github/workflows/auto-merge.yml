@@ -32,5 +32,5 @@ jobs:
     steps:
       - name: Enable native auto-merge (squash)
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.AUTOMERGE_PAT }}   # NÃO usar GITHUB_TOKEN: merge dele não dispara process-deploy
         run: gh pr merge --auto --squash "${{ github.event.pull_request.number }}" -R "${{ github.repository }}"
